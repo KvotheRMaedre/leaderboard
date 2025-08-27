@@ -1,6 +1,5 @@
 package tech.kvothe.leaderboard.service;
 
-import net.bytebuddy.matcher.MethodExceptionTypeMatcher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import tech.kvothe.leaderboard.dto.UserDto;
 import tech.kvothe.leaderboard.entity.User;
 import tech.kvothe.leaderboard.exception.UserNameNotAvailableException;
