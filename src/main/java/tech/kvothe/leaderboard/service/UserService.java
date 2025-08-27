@@ -4,6 +4,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import tech.kvothe.leaderboard.dto.LoginDto;
 import tech.kvothe.leaderboard.dto.RecoveryJwtTokenDto;
 import tech.kvothe.leaderboard.dto.UserDto;
 import tech.kvothe.leaderboard.entity.User;
@@ -28,9 +29,9 @@ public class UserService {
         this.securityConfiguration = securityConfiguration;
     }
 
-    public RecoveryJwtTokenDto authenticateUser(UserDto userDto) {
+    public RecoveryJwtTokenDto authenticateUser(LoginDto loginDto) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                new UsernamePasswordAuthenticationToken(userDto.userName(), userDto.password());
+                new UsernamePasswordAuthenticationToken(loginDto.userName(), loginDto.password());
         Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();

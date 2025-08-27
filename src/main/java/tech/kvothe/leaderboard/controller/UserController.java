@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tech.kvothe.leaderboard.dto.LoginDto;
+import tech.kvothe.leaderboard.dto.RecoveryJwtTokenDto;
 import tech.kvothe.leaderboard.dto.UserDto;
 import tech.kvothe.leaderboard.service.UserService;
 
@@ -27,8 +29,9 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(){
-        return null;
+    public ResponseEntity<RecoveryJwtTokenDto> authenticateUser(@RequestBody @Valid LoginDto loginDto) {
+        RecoveryJwtTokenDto token = userService.authenticateUser(loginDto);
+        return ResponseEntity.ok(token);
     }
 
     @PostMapping("/test")
