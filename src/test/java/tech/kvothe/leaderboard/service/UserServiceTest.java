@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import tech.kvothe.leaderboard.dto.UserDto;
 import tech.kvothe.leaderboard.entity.User;
 import tech.kvothe.leaderboard.exception.UserNameNotAvailableException;
+import tech.kvothe.leaderboard.exception.UserNotFoundInLeaderboardException;
 import tech.kvothe.leaderboard.factory.UserDtoFactory;
 import tech.kvothe.leaderboard.factory.UserFactory;
 import tech.kvothe.leaderboard.repository.UserRepository;
@@ -39,6 +40,9 @@ class UserServiceTest {
 
     @Mock
     private SecurityConfiguration securityConfiguration;
+
+    @Mock
+    private RedisService redisService;
 
     @InjectMocks
     private UserService userService;
@@ -112,4 +116,91 @@ class UserServiceTest {
         }
     }
 
+    @Nested
+    class getUserRaking {
+        @Test
+        @DisplayName("Should validate if user exists in leaderboard")
+        public void shouldValidateIfUserExistsInLeaderboard() {
+            var game = "subnautica";
+            var name = "ryley";
+
+            doReturn(true)
+                    .when(redisService)
+                    .userExistsInLeaderboard(stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
+
+            doReturn(1L)
+                    .when(redisService)
+                    .getUserRaking(any(), any());
+
+            userService.getUserRaking(game, name);
+
+            var stringsCaptured = stringArgumentCaptor.getAllValues();
+
+            assertEquals(game, stringsCaptured.getFirst());
+            assertEquals(name, stringsCaptured.getLast());
+            verify(redisService, times(1))
+                    .userExistsInLeaderboard(stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
+        }
+
+        @Test
+        @DisplayName("Should throw exception in case use doesn't exists in the leaderboard")
+        public void shouldThrowExceptionInCaseUserDoesNotExistsInLeaderboard() {
+            var game = "subnautica";
+            var name = "ryley";
+
+            doReturn(false)
+                    .when(redisService)
+                    .userExistsInLeaderboard(stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
+
+            assertThrows(UserNotFoundInLeaderboardException.class, () ->userService.getUserRaking(game, name));
+            verify(redisService, times(1))
+                    .userExistsInLeaderboard(stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
+        }
+
+        @Test
+        @DisplayName("Should return the correct rank")
+        public void shouldReturnCorrectRank() {
+            var game = "subnautica";
+            var name = "ryley";
+
+            doReturn(true)
+                    .when(redisService)
+                    .userExistsInLeaderboard(any(), any());
+
+            doReturn(1L)
+                    .when(redisService)
+                    .getUserRaking(any(), any());
+
+            var actualResponse = userService.getUserRaking(game, name);
+
+            assertEquals(1L, actualResponse);
+            verify(redisService, times(1))
+                    .getUserRaking(any(), any());
+        }
+
+        @Test
+        @DisplayName("Should pass correct parameters to redis service")
+        public void shouldPassCorrectParametersToService() {
+            var game = "subnautica";
+            var name = "ryley";
+
+            doReturn(true)
+                    .when(redisService)
+                    .userExistsInLeaderboard(stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
+
+            doReturn(1L)
+                    .when(redisService)
+                    .getUserRaking(stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
+
+            userService.getUserRaking(game, name);
+
+            var stringsCaptured = stringArgumentCaptor.getAllValues();
+            assertEquals(4, stringsCaptured.size());
+            assertEquals(game, stringsCaptured.getFirst());
+            assertEquals(name, stringsCaptured.get(1));
+            assertEquals(game, stringsCaptured.get(2));
+            assertEquals(name, stringsCaptured.get(3));
+
+        }
+    }
 }
