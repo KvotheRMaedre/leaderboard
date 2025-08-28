@@ -31,7 +31,7 @@ public class SecurityConfiguration {
     };
 
     public static final String [] ENDPOINTS_WITH_AUTHENTICATION_REQUIRED = {
-            "/user/test",
+            "/leaderboard/{game}/score",
     };
 
     @Bean
