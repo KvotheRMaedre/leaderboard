@@ -17,4 +17,15 @@ public class RedisService {
         var leaderboard = "leaderboard:" + game;
         return jedis.zadd(leaderboard, score, userName);
     }
+
+    public Long getUserRaking(String game, String userName) {
+        var leaderboard = "leaderboard:" + game;
+        return jedis.zrevrank(leaderboard, userName) + 1;
+    }
+
+    public boolean userExistsInLeaderboard(String game, String userName) {
+        var leaderboard = "leaderboard:" + game;
+        var result =  jedis.zscore(leaderboard, userName);
+        return result != null;
+    }
 }

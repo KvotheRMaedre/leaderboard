@@ -9,6 +9,7 @@ import tech.kvothe.leaderboard.dto.RecoveryJwtTokenDto;
 import tech.kvothe.leaderboard.dto.UserDto;
 import tech.kvothe.leaderboard.entity.User;
 import tech.kvothe.leaderboard.exception.UserNameNotAvailableException;
+import tech.kvothe.leaderboard.exception.UserNotFoundInLeaderboardException;
 import tech.kvothe.leaderboard.repository.UserRepository;
 import tech.kvothe.leaderboard.security.authentication.JwtTokenService;
 import tech.kvothe.leaderboard.security.config.SecurityConfiguration;
@@ -21,12 +22,14 @@ public class UserService {
     private final JwtTokenService jwtTokenService;
     private final UserRepository userRepository;
     private final SecurityConfiguration securityConfiguration;
+    private final RedisService redisService;
 
-    public UserService(AuthenticationManager authenticationManager, JwtTokenService jwtTokenService, UserRepository userRepository, SecurityConfiguration securityConfiguration) {
+    public UserService(AuthenticationManager authenticationManager, JwtTokenService jwtTokenService, UserRepository userRepository, SecurityConfiguration securityConfiguration, RedisService redisService) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenService = jwtTokenService;
         this.userRepository = userRepository;
         this.securityConfiguration = securityConfiguration;
+        this.redisService = redisService;
     }
 
     public RecoveryJwtTokenDto authenticateUser(LoginDto loginDto) {
@@ -56,5 +59,12 @@ public class UserService {
         var user = userRepository.findByUserName(userName);
         if (user.isPresent())
             throw new UserNameNotAvailableException(userName);
+    }
+
+    public Long getUserRaking(String game, String name) {
+        if (redisService.userExistsInLeaderboard(game, name))
+            return redisService.getUserRaking(game, name);
+        else
+            throw new UserNotFoundInLeaderboardException(game, name);
     }
 }
