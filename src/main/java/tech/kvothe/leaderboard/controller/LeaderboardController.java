@@ -6,21 +6,29 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import tech.kvothe.leaderboard.dto.ScoreDto;
 import tech.kvothe.leaderboard.service.RedisService;
+import tech.kvothe.leaderboard.service.ScoreService;
 
 @RestController
 @RequestMapping("/leaderboard")
 public class LeaderboardController {
 
-    private final RedisService redisService;
+    private final ScoreService scoreService;
 
-    public LeaderboardController(RedisService redisService) {
-        this.redisService = redisService;
+    public LeaderboardController(ScoreService scoreService) {
+        this.scoreService = scoreService;
     }
 
     @PostMapping("{game}/score")
-    public ResponseEntity<Void> submitScore(@PathVariable("game") String game,
+    public ResponseEntity<String> submitScore(@PathVariable("game") String game,
                                             @RequestBody @Valid ScoreDto request) {
-        redisService.submitScore(request, game, SecurityContextHolder.getContext().getAuthentication().getName());
-        return ResponseEntity.ok().build();
+        String message;
+        var response = scoreService.submitScore(request, game, SecurityContextHolder.getContext().getAuthentication().getName());
+
+        if (response == 0L)
+            message = "We will only consider the last score you submitted for each leaderboard!";
+        else
+            message = "Score submitted!";
+
+        return ResponseEntity.ok(message);
     }
 }

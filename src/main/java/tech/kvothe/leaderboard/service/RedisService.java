@@ -13,13 +13,8 @@ public class RedisService {
         this.jedis = new UnifiedJedis("redis://" + System.getenv("REDIS_URL"));
     }
 
-    public void submitScore(ScoreDto submitScoreDTO, String game, String userName) {
+    public Long addScore(String game, double score, String userName) {
         var leaderboard = "leaderboard:" + game;
-
-        var result = jedis.zadd(leaderboard, submitScoreDTO.score(), userName);
+        return jedis.zadd(leaderboard, score, userName);
     }
-
-
-
-
 }
